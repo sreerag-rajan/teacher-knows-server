@@ -1,5 +1,6 @@
 //Importing node packages and third party packages
 const express = require("express");
+const cors = require('cors')
 
 //Importing from within the src
 const connect = require("./configs/db")
@@ -10,6 +11,7 @@ const app = express();
 //middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors())
 
 //routes
 app.use("/auth",authController)
