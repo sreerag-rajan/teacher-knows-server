@@ -5,76 +5,85 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require('bcryptjs')
 
 const User = require("../models/user.model");
+const mailer  = require("../services/mail.service");
 
 const router = express.Router();
 
 const newToken = (user)=>{
-    return jwt.sign({user}, process.env.JWT_SECRET_KEY);
+  return jwt.sign({user}, process.env.JWT_SECRET_KEY);
 }
 
 router.post("/register",
-    body("firstName").notEmpty().withMessage("This field cannot be empty"),
-    body("lastName").notEmpty().withMessage("This field cannot be empty"),
-    body("email").isEmail().withMessage("Needs to be a valid email"),
-    // body("password").isStrongPassword().withMessage("The character should be 8 characters long atleast"),
-    async (req, res)=>{
-    try{
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-        let user = await User.findOne({"email":req.body.email})
-        if(user){
-            return res.status(400).json({error: "Email in use"});
-        }
+	body("firstName").notEmpty().withMessage("This field cannot be empty"),
+	body("lastName").notEmpty().withMessage("This field cannot be empty"),
+	body("email").isEmail().withMessage("Needs to be a valid email"),
+	// body("password").isStrongPassword().withMessage("The character should be 8 characters long atleast"),
+	async (req, res)=>{
+	try{
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			return res.status(400).json({ errors: errors.array() });
+		}
+		let user = await User.findOne({"email":req.body.email})
+		if(user){
+			return res.status(400).json({error: "Email in use"});
+		}
 
-        user = await User.create(req.body);
-        const token = newToken(user);
-        let payload = {
-            id: user._id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email
-        }
-        return res.status(201).json({user:payload, token});
-    }
-    catch(er){
-        console.error('ERROR ::: register ::: ', er)
-        return res.status(500).json({error: er.message});
-    }
+		user = await User.create(req.body);
+		const token = newToken(user);
+		let payload = {
+			id: user._id,
+			firstName: user.firstName,
+			lastName: user.lastName,
+			email: user.email
+		}
+		await mailer({
+			to: user.email,
+			from:'tkAdmin@yopmail.com',
+			subject: 'Welcome to TK',
+			text : `Hello ${user.firstName} ${user.lastName} \n Welcome to Teacher Knows! \n We hope this platform helps you better understand your students and their performance and help guide them better`,
+			html: `<h1>Welcome to Teacher Knows</h1>
+							<p>We hope this platform helps you better understand your students and their performance and help guide them better</p>`             
+		}).catch(console.error)
+		return res.status(201).json({user:payload, token});
+  }
+	catch(er){
+		console.error('ERROR ::: register ::: ', er)
+		return res.status(500).json({error: er.message});
+	}
 }) 
 
 router.post("/login",
-    body("email").isEmail().withMessage("Needs to be a valid email"),
-    // body("password").isStrongPassword().withMessage("The character should be 8 characters long atleast"),
-    async (req, res)=>{
-    try{
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-        let user = await User.findOne({email: req.body.email}).lean().exec();
-        if(!user) return res.status(400).json({error: "Incorrect Email or Password"});
+	body("email").isEmail().withMessage("Needs to be a valid email"),
+	// body("password").isStrongPassword().withMessage("The character should be 8 characters long atleast"),
+	async (req, res)=>{
+	try{
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+				return res.status(400).json({ errors: errors.array() });
+		}
+		let user = await User.findOne({email: req.body.email}).lean().exec();
+		if(!user) return res.status(400).json({error: "Incorrect Email or Password"});
 
-        // const match = user.checkPassword(req.body.password);
-        const match = bcrypt.compareSync(req.body.password, user.password);
-        if(!match) return res.status(400).json({error: "Incorrect Email or Password"});
+		// const match = user.checkPassword(req.body.password);
+		const match = bcrypt.compareSync(req.body.password, user.password);
+		if(!match) return res.status(400).json({error: "Incorrect Email or Password"});
 
-        const token = newToken(user);
-        let payload = {
-            id: user._id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email
-        }
-        return res.status(201).send({user:payload, token});
-        //return res.status(210).redirect(/:userid/dashboard);
-
-    }
-    catch(er){
-        console.error('ERROR ::: login ::: '. er)
-        return res.status(500).send(er.message);
-    }
+		await User.findByIdAndUpdate(user._id,{lastLogin: Date.now()})
+		const token = newToken(user);
+		let payload = {
+				id: user._id,
+				firstName: user.firstName,
+				lastName: user.lastName,
+				email: user.email
+		}
+		return res.status(201).send({user:payload, token});
+		//return res.status(210).redirect(/:userid/dashboard);
+  }
+	catch(er){
+		console.error('ERROR ::: login ::: '. er)
+		return res.status(500).send(er.message);
+	}
 }) 
 
 //For the time being commented out
