@@ -5,6 +5,7 @@ const cors = require('cors')
 //Importing from within the src
 const connect = require("./configs/db")
 const authController = require("./controllers/auth.controller"); 
+const tokenController = require('./controllers/token.controller');
 
 const app = express();
 
@@ -14,7 +15,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors())
 
 //routes
-app.use("/auth",authController)
+app.use("/auth", authController);
+app.use('/token', tokenController);
 
 
 //connecting to server and database;

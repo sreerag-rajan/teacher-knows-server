@@ -35,17 +35,10 @@ router.post("/register",
 			id: user._id,
 			firstName: user.firstName,
 			lastName: user.lastName,
-			email: user.email
+			email: user.email,
+			verified: user.verified,
 		}
-		await mailer({
-			to: user.email,
-			from:'tkAdmin@yopmail.com',
-			subject: 'Welcome to TK',
-			text : `Hello ${user.firstName} ${user.lastName} \n Welcome to Teacher Knows! \n We hope this platform helps you better understand your students and their performance and help guide them better`,
-			html: `<h1>Welcome to Teacher Knows</h1>
-							<p>We hope this platform helps you better understand your students and their performance and help guide them better</p>`             
-		}).catch(console.error)
-		return res.status(201).json({user:payload, token});
+		return res.status(200).json({user:payload, token});
   }
 	catch(er){
 		console.error('ERROR ::: register ::: ', er)
@@ -75,10 +68,10 @@ router.post("/login",
 				id: user._id,
 				firstName: user.firstName,
 				lastName: user.lastName,
-				email: user.email
+				email: user.email,
+				verified: user.verified,
 		}
 		return res.status(201).send({user:payload, token});
-		//return res.status(210).redirect(/:userid/dashboard);
   }
 	catch(er){
 		console.error('ERROR ::: login ::: '. er)
