@@ -36,7 +36,7 @@ router.post("/register",
 			firstName: user.firstName,
 			lastName: user.lastName,
 			email: user.email,
-			verified: user.verified,
+			isVerified: user.verified,
 		}
 		return res.status(200).json({user:payload, token});
   }
@@ -69,7 +69,7 @@ router.post("/login",
 				firstName: user.firstName,
 				lastName: user.lastName,
 				email: user.email,
-				verified: user.verified,
+				isVerified: user.verified,
 		}
 		return res.status(201).send({user:payload, token});
   }

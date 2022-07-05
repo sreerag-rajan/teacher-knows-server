@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
     password : {type: String, required:true},
     lastLogin : {type: Date, required: true, default: Date.now()},
     role : {type: String, enum:['ADMIN', 'TEACHER', 'STUDENT'], default:'TEACHER'},
-    verified: {type: Boolean, default: false},
+    isVerified: {type: Boolean, default: false},
 },
 {
     versionKey: false,

@@ -64,7 +64,7 @@ router.post('/verify-token', async (req, res) =>{
 				firstName: user.firstName,
 				lastName: user.lastName,
 				email: user.email,
-        verified: user.verified,
+        isVerified: user.verified,
 		}
       return res.status(200).send({status:200, msg: "Token Successfully Verified", user:payload})
     }
