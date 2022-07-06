@@ -42,11 +42,10 @@ router.post('/create-token', async (req, res) =>{
 router.post('/verify-token', async (req, res) =>{
   try{
     const token = await Token.findOne({token: req.body.token}).lean().exec();
-    console.log("token:", token)
     if(token){
       let user;
       if(req.body.type==="REGISTER"){
-        user = await User.findByIdAndUpdate(token.user,{verified: true}, {new: true}).lean().exec();
+        user = await User.findByIdAndUpdate(token.user,{isVerified: true}, {new: true}).lean().exec();
         await mailer({
           to: user.email,
           from:'tkAdmin@yopmail.com',
@@ -64,9 +63,9 @@ router.post('/verify-token', async (req, res) =>{
 				firstName: user.firstName,
 				lastName: user.lastName,
 				email: user.email,
-        isVerified: user.verified,
+        isVerified: user.isVerified,
 		}
-      return res.status(200).send({status:200, msg: "Token Successfully Verified", user:payload})
+      return res.status(200).send({status:200, msg: "Token Successfully Verified", user:payload, token})
     }
     else{
       return res.status(400).send({status:400, msg: "Incorrect Token"})

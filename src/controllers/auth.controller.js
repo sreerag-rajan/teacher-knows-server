@@ -5,7 +5,6 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require('bcryptjs')
 
 const User = require("../models/user.model");
-const mailer  = require("../services/mail.service");
 
 const router = express.Router();
 
@@ -36,7 +35,7 @@ router.post("/register",
 			firstName: user.firstName,
 			lastName: user.lastName,
 			email: user.email,
-			isVerified: user.verified,
+			isVerified: user.isVerified,
 		}
 		return res.status(200).json({user:payload, token});
   }
@@ -69,7 +68,7 @@ router.post("/login",
 				firstName: user.firstName,
 				lastName: user.lastName,
 				email: user.email,
-				isVerified: user.verified,
+				isVerified: user.isVerified,
 		}
 		return res.status(201).send({user:payload, token});
   }
