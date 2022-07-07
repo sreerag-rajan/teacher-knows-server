@@ -27,7 +27,7 @@ router.post('/create-token', async (req, res) =>{
           <p>Verification code is ${token.token}</p>
         `
       });
-      return res.status(200).send({token});
+      return res.status(200).send({msg:'Token has been sent to your email', user});
     }
     else{
       return res.status(400).json({msg: "No user information detected"})
