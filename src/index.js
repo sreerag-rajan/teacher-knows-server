@@ -12,6 +12,7 @@ const authenticate = require('./middlewares/authenticate.middleware')
 const authController = require("./controllers/auth.controller"); 
 const tokenController = require('./controllers/token.controller');
 const subjectController = require('./controllers/subject.controller');
+const classesController = require('./controllers/classes.controller');
 
 const app = express();
 
@@ -23,7 +24,8 @@ app.use(cors())
 //routes
 app.use("/auth", authController);
 app.use('/token', tokenController);
-app.use('/subject', authenticate, subjectController)
+app.use('/subject', authenticate, subjectController);
+app.use('/classes', authenticate, classesController);
 
 
 //connecting to server and database;
