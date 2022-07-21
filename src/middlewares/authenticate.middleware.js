@@ -27,7 +27,7 @@ module.exports = async (req,res,next)=>{
         return res.status(400).send({message: "authorization token was not provided or is invalid"}); 
     }
 
-    req.user = user.user;
+    req.body.user = user.user._id;
 
     return next();
 }

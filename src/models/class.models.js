@@ -7,9 +7,10 @@ const classSchema = new mongoose.Schema({
     section : {type: String, required:true},
     subject: [{type: mongoose.Schema.Types.ObjectId, ref:"subject"}],
     numOfStudents : {type: Number, default:0, required:false},
-    userId: {type: mongoose.Schema.Types.ObjectId, ref:"user", required:true}
+    user : {type: mongoose.Schema.Types.ObjectId, ref:"user", required:true}
 },{
-    timestamps:true
+    timestamps:true,
+    versionKey: false
 })
 
 module.exports= mongoose.model("classes", classSchema);

@@ -4,8 +4,14 @@ const cors = require('cors')
 
 //Importing from within the src
 const connect = require("./configs/db")
+
+//Middleware
+const authenticate = require('./middlewares/authenticate.middleware')
+
+//Controllers
 const authController = require("./controllers/auth.controller"); 
 const tokenController = require('./controllers/token.controller');
+const subjectController = require('./controllers/subject.controller');
 
 const app = express();
 
@@ -17,6 +23,7 @@ app.use(cors())
 //routes
 app.use("/auth", authController);
 app.use('/token', tokenController);
+app.use('/subject', authenticate, subjectController)
 
 
 //connecting to server and database;

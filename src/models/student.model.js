@@ -7,9 +7,10 @@ const studentSchema = new mongoose.Schema({
     studentEmail:{type:String, required:false},
     parentEmail: {type:String, required:false},
     classId: {type: mongoose.Schema.Types.ObjectId, ref:"classes", required:true},
-    userId: {type: mongoose.Schema.Types.ObjectId, ref:"user", required:true}
+    user : {type: mongoose.Schema.Types.ObjectId, ref:"user", required:true}
 },{
-    timestamps:true
+    timestamps:true,
+    versionKey: false
 })
 
 module.exports = mongoose.model("student", studentSchema);
