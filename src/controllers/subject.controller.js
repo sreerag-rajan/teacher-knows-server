@@ -5,9 +5,9 @@ const Subject = require('../models/subject.model');
 const router = express.Router();
 
 //Helper functions
-const getSubjectsFunction = async (user)=>{
+const getSubjectsFunction = async (user, search='')=>{
   return new Promise((resolve, reject)=>{
-    Subject.find({user_id: user}).sort({'createdAt': -1}).lean().exec()
+    Subject.find({user_id: user}).sort({'createdAt': -1}).where({name: new RegExp(search, 'i')}).lean().exec()
       .then((subjects)=> resolve(subjects))
       .catch((er)=>reject(er))
   })
@@ -28,7 +28,8 @@ router.post('/', async (req, res)=>{
 
 router.get('/', async (req, res)=>{
   try{
-    const subjects = await getSubjectsFunction(req.body.user);
+    const {search} = req.query;
+    const subjects = await getSubjectsFunction(req.body.user, search);
     return res.status(200).json(subjects);
   }
   catch(er){

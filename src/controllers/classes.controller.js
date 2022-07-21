@@ -7,7 +7,7 @@ const router = express.Router();
 //Helper functions
 const getAllClasses = async (user) => {
   return new Promise((resolve, reject)=>{
-    await Classes.find({user}).sort({'grade': 1, 'section': 1}).lean().exec()
+    Classes.find({user}).sort({'grade': 1, 'section': 1}).lean().exec()
       .then((classes) => resolve(classes))
       .catch(er => reject(er));
   })
