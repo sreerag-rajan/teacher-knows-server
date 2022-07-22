@@ -5,7 +5,7 @@ const Subject = require('../models/subject.model');
 const router = express.Router();
 
 //Helper functions
-const getSubjectsFunction = async (user, search='')=>{
+const getAllSubjects = async (user, search='')=>{
   return new Promise((resolve, reject)=>{
     Subject.find({user_id: user}).sort({'createdAt': -1}).where({name: new RegExp(search, 'i')}).lean().exec()
       .then((subjects)=> resolve(subjects))
@@ -16,8 +16,9 @@ const getSubjectsFunction = async (user, search='')=>{
 //Routes
 router.post('/', async (req, res)=>{
   try{
-    const subject = await Subject.create(req.body);
-    return res.status(200).json(subject)
+    await Subject.create(req.body);
+    const subjects = await getAllSubjects(req.body.user)
+    return res.status(200).json(subjects)
 
   }
   catch(er){
@@ -29,7 +30,7 @@ router.post('/', async (req, res)=>{
 router.get('/', async (req, res)=>{
   try{
     const {search} = req.query;
-    const subjects = await getSubjectsFunction(req.body.user, search);
+    const subjects = await getAllSubjects(req.body.user, search);
     return res.status(200).json(subjects);
   }
   catch(er){
@@ -51,8 +52,9 @@ router.get('/:id', async (req, res)=>{
 })
 router.patch('/:id', async (req, res)=>{
   try{
-    const subject = await Subject.findByIdAndUpdate(req.params.id, req.body, {new:true}).lean().exec()
-    return res.status(200).json(subject);
+    await Subject.findByIdAndUpdate(req.params.id, req.body, {new:true}).lean().exec();
+    const subjects = await getAllSubjects(req.body.user)
+    return res.status(200).json(subjects);
 
   }
   catch(er){
@@ -64,7 +66,7 @@ router.patch('/:id', async (req, res)=>{
 router.delete('/:id', async (req, res)=>{
   try{
     await Subject.findByIdAndDelete(req.params.id);
-    const subjects = await getSubjectsFunction(req.body.userId);
+    const subjects = await getAllSubjects(req.body.user);
     return res.status(200).json(subjects);
   }
   catch(er){
