@@ -7,7 +7,7 @@ const router = express.Router();
 //Helper functions
 const getAllSubjects = async (user, search='')=>{
   return new Promise((resolve, reject)=>{
-    Subject.find({user_id: user}).sort({'createdAt': -1}).where({name: new RegExp(search, 'i')}).lean().exec()
+    Subject.find({user: user}).sort({'createdAt': -1}).where({name: new RegExp(search, 'i')}).lean().exec()
       .then((subjects)=> resolve(subjects))
       .catch((er)=>reject(er))
   })
@@ -71,6 +71,18 @@ router.delete('/:id', async (req, res)=>{
   }
   catch(er){
     console.error('ERROR ::: delete a subject route ::: ', er);
+    return res.status(500).json({error:er});
+  }
+})
+
+router.post('/check-entity-availability', async (req, res)=>{
+  try{
+    const subject = await Subject.findOne({user : req.body.user, name : req.body.name}).lean().exec()
+    if(subject) return res.status(400).json({msg: 'Enitity Already Exists', subject})
+    else return res.status(200).json(subject);
+  }
+  catch(er){
+    console.error('ERROR ::: subject entity availablity route ::: ', er);
     return res.status(500).json({error:er});
   }
 })
