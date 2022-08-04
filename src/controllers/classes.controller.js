@@ -50,8 +50,9 @@ router.get('/:id', async (req,res)=>{
 
 router.patch('/:id', async (req,res)=>{
   try{
-    const classe = await Classes.findByIdAndUpdate(req.params.id, req.body, {new: true}).lean().exec();
-    return res.status(200).json(classe);
+    await Classes.findByIdAndUpdate(req.params.id, req.body, {new:true}).lean().exec();
+    const classes = await getAllClasses(req.body.user);
+    return res.status(200).json(classes);
   }
   catch(er){
     console.error('ERROR ::: get all classes route ::: ', er);
