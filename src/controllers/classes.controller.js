@@ -1,6 +1,7 @@
 const express = require('express');
 
 const Classes = require('../models/class.models');
+const Student = require('../models/student.model');
 
 const router = express.Router();
 
@@ -39,8 +40,9 @@ router.get('/', async (req,res)=>{
 
 router.get('/:id', async (req,res)=>{
   try{
-    const classe = await Classes.findById(req.params.id).lean().exec()
-    return res.status(200).json(classe)
+    const classe = await Classes.findById(req.params.id).lean().exec();
+    const students = await Student.find({classId : req.params.id, user: req.body.user}).lean().exec();
+    return res.status(200).json({classe, students})
   }
   catch(er){
     console.error('ERROR ::: get all classes route ::: ', er);
@@ -70,6 +72,20 @@ router.delete('/:id', async (req,res)=>{
   }
   catch(er){
     console.error('ERROR ::: get all classes route ::: ', er);
+    return res.status(500).json({error: er});
+  }
+})
+router.post('/check-entity-availablity', async (req, res) => {
+  try{
+    const {grade, section, user } = req.body;
+    const classe = await Classes.findOne({grade, section, user}).lean().exec();
+    if(classe)
+      return res.status(400).json({msg: 'Class exists', classe}) 
+    else 
+      return res.status(200).json({msg: "No Classes Found"});
+  }
+  catch(er){
+    console.error('ERROR ::: check classes Entity route :::', er);
     return res.status(500).json({error: er});
   }
 })
