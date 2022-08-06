@@ -40,7 +40,7 @@ router.get('/', async (req,res)=>{
 
 router.get('/:id', async (req,res)=>{
   try{
-    const classe = await Classes.findById(req.params.id).lean().exec();
+    const classe = await Classes.findById(req.params.id).populate('subjects', ['name', '_id']).lean().exec();
     const students = await Student.find({classId : req.params.id, user: req.body.user}).lean().exec();
     return res.status(200).json({classe, students})
   }
