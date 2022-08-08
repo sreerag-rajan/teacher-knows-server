@@ -40,8 +40,11 @@ router.get('/', async (req,res)=>{
 
 router.get('/:id', async (req,res)=>{
   try{
-    const classe = await Classes.findById(req.params.id).populate('subjects', ['name', '_id']).lean().exec();
+    let classe = await Classes.findById(req.params.id).populate('subjects', ['name', '_id']).lean().exec();
     const students = await Student.find({classId : req.params.id, user: req.body.user}).lean().exec();
+    if(students.length!== classe.numberOfStudents){
+      classe = await Classes.findByIdAndUpdate(req.params.id, {numberOfStudents : students.length}, {new:true}).populate('subjects', ['name', '_id']).lean().exec();
+    }
     return res.status(200).json({classe, students})
   }
   catch(er){
@@ -65,7 +68,7 @@ router.patch('/:id', async (req,res)=>{
 router.delete('/:id', async (req,res)=>{
   try{
     await Classes.findByIdAndDelete(req.params.id);
-    // const deletedStudents = await Students.deleteMany({classId : req.params.id})
+    const deletedStudents = await Student.deleteMany({classId : req.params.id})
     const classes = await getAllClasses(req.body.user);
     return res.status(200).json(classes);
     

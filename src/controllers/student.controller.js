@@ -1,7 +1,7 @@
 const express = require('express');
 
 const Student = require('../models/student.model');
-
+const Classes = require('../models/class.models');
 const router = express.Router();
 
 //Helper Functions
@@ -14,12 +14,22 @@ const getAllStudents = (classId, search={}) => {
   })
 }
 
+const updateClassHelper = (classId, increaseBy) => {
+  return new Promise((resolve, reject) => {
+    Classes.findByIdAndUpdate(classId, {$inc: {numberOfStudents: increaseBy}}, {new: true}).populate('subjects', ['name', '_id']).lean().exec()
+      .then(res => resolve(res))
+      .catch((er) => reject(er))
+    
+  })
+}
+
 //Routes
 router.post('/', async (req, res) => {
   try{
     await Student.create(req.body)
     const students = await getAllStudents(req.body.classId);
-    return res.status(200).json(students);
+    const classe = await updateClassHelper(req.body.classId, 1)
+    return res.status(200).json({students, classe});
 
   }
   catch(er){
@@ -53,8 +63,17 @@ router.get('/:id', async (req, res) => {
 
 router.patch('/:id', async (req, res) => {
   try{
-    const student = await Student.findByIdAndUpdate(req.params.id, req.body, {new:true}).lean().exec();
-    return res.status(200).json(student);
+    let student = await Student.findById(req.params.id).lean().exec();
+    let classe;
+    if(student.classId !== req.body.classId){
+      await Classes.findByIdAndUpdate(student.classId, {$inc : {numberOfStudents : -1}})
+      classe = await updateClassHelper(req.body.classId, 1)
+    }
+    
+    await Student.findByIdAndUpdate(req.params.id, req.body, {new:true}).lean().exec();
+    
+    const students = await getAllStudents(req.body.classId, search);
+    return res.status(200).json({students, classe});
 
   }
   catch(er){
@@ -67,7 +86,8 @@ router.delete('/:id', async (req, res) => {
   try{
     let info = await Student.findByIdAndDelete(req.params.id);
     const students = getAllStudents(info.classId);
-    return res.status(200).json(students);
+    const classe = await updateClassHelper(req.body.classId, -1)
+    return res.status(200).json({students, classe});
 
   }
   catch(er){
