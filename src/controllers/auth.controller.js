@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require('bcryptjs')
 
 const User = require("../models/user.model");
-const mailer  = require("../services/mail.service");
+const Token = require('../models/token.model')
 
 const router = express.Router();
 
@@ -35,17 +35,10 @@ router.post("/register",
 			id: user._id,
 			firstName: user.firstName,
 			lastName: user.lastName,
-			email: user.email
+			email: user.email,
+			isVerified: user.isVerified,
 		}
-		await mailer({
-			to: user.email,
-			from:'tkAdmin@yopmail.com',
-			subject: 'Welcome to TK',
-			text : `Hello ${user.firstName} ${user.lastName} \n Welcome to Teacher Knows! \n We hope this platform helps you better understand your students and their performance and help guide them better`,
-			html: `<h1>Welcome to Teacher Knows</h1>
-							<p>We hope this platform helps you better understand your students and their performance and help guide them better</p>`             
-		}).catch(console.error)
-		return res.status(201).json({user:payload, token});
+		return res.status(200).json({user:payload, token});
   }
 	catch(er){
 		console.error('ERROR ::: register ::: ', er)
@@ -75,10 +68,10 @@ router.post("/login",
 				id: user._id,
 				firstName: user.firstName,
 				lastName: user.lastName,
-				email: user.email
+				email: user.email,
+				isVerified: user.isVerified,
 		}
 		return res.status(201).send({user:payload, token});
-		//return res.status(210).redirect(/:userid/dashboard);
   }
 	catch(er){
 		console.error('ERROR ::: login ::: '. er)
@@ -103,5 +96,27 @@ router.post("/login",
 //         return res.status(500).json({error: er});
 //     }
 // })
+router.post('/reset-password', async (req,res)=>{
+	try{
+		let token = await Token.findById(req.body.token).lean().exec();
+		if(!token){
+			return res.status(400).json({error: "NO TOKEN FOUND"});
+		}
+		let user = await User.findByIdAndUpdate(token.user, {password:bcrypt.hashSync(req.body.password, 8)}, {new:true}).lean().exec();
+		if(!user) return res.status(400).json({error:"No User Found"})
+		let payload = {
+			id: user._id,
+			firstName: user.firstName,
+			lastName: user.lastName,
+			email: user.email,
+			isVerified: user.isVerified,
+		}
+		return res.status(200).json({user:payload})
 
+	}
+	catch(err){
+		console.error('ERROR ::: reset-password :::', err);
+		return res.status(500).json({error: err.message})
+	}
+})
 module.exports = router;

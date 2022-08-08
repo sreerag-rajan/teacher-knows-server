@@ -4,8 +4,8 @@ const nodemailer = require('nodemailer')
 const mailer = async ({from, to, subject, text, html}) => {
   try{
     let transporter = nodemailer.createTransport({
-      // host: "smtp.mailtrap.io",
-      host: 'smt.gmail.com',
+      host: "smtp.mailtrap.io",
+      // host: 'smt.gmail.com',
       port: 2525,
       secure: false,
       auth: {
