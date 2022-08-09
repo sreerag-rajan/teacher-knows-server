@@ -85,8 +85,8 @@ router.patch('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try{
     let info = await Student.findByIdAndDelete(req.params.id);
-    const students = getAllStudents(info.classId);
-    const classe = await updateClassHelper(req.body.classId, -1)
+    const students = await getAllStudents(info.classId);
+    const classe = await updateClassHelper(info.classId, -1);
     return res.status(200).json({students, classe});
 
   }
