@@ -101,12 +101,35 @@ router.post('/check-entity-availablity', async (req, res) => {
     const {rollNumber, classId, user } = req.body;
     const student = await Student.findOne({rollNumber, classId, user}).lean().exec();
     if(student)
-      return res.status(400).json({msg: 'Student exists', classe}) 
+      return res.status(400).json({msg: 'Student exists', student}); 
     else 
       return res.status(200).json({msg: "No Student Found"});
   }
   catch(er){
     console.error('ERROR ::: check classes Entity route :::', er);
+    return res.status(500).json({error: er});
+  }
+})
+
+router.post('/bulk-create', async (req, res) => {
+  try{
+    const {students, user, classId} = req.body;
+    
+    //Adding user to every student info
+    const payload = students.map((el) => {
+      return {...el, user};
+    })
+
+    //InsertMany
+    await Student.insertMany(payload);
+
+    //Preparing response to send back
+    const response = await getAllStudents(classId);
+
+    return res.status(200).json(response);
+  }
+  catch(er){
+    console.error('ERROR ::: student bulk create ::: ', er);
     return res.status(500).json({error: er});
   }
 })
