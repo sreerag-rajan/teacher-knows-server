@@ -124,7 +124,8 @@ router.post('/bulk-create', async (req, res) => {
     await Student.insertMany(payload);
 
     //Preparing response to send back
-    const response = await getAllStudents(classId);
+
+    const response = classId ? await getAllStudents(classId) : [];
 
     return res.status(200).json(response);
   }
